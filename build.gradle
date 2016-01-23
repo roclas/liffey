@@ -1,0 +1,59 @@
+buildscript {
+	repositories {
+		ivy {
+			url 'https://bndtools.ci.cloudbees.com/job/bnd.master/719/artifact/dist/bundles'
+			layout 'pattern', {
+				artifact '[module]/[artifact]-[revision].[ext]' /* OSGi repo pattern */
+			}
+		}
+	}
+	dependencies {
+		classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:3.0.0'
+	}
+}
+
+apply plugin: 'maven'
+apply plugin: 'scala'
+apply plugin: 'java'
+apply plugin: 'biz.aQute.bnd.builder'
+
+repositories {
+	mavenCentral()
+	mavenLocal()
+	maven {
+		url 'https://repository.liferay.com/nexus/content/groups/public'
+	}
+	ivy {
+		url "/home/carlos/.ivy2/local"
+	}
+}
+
+sourceCompatibility = 1.7
+version = '1.0'
+
+dependencies {
+	compile 'com.liferay.portal:portal-service:7.0.0-SNAPSHOT'
+	compile 'org.osgi:org.osgi.compendium:5.0.0'
+	compile "org.scala-lang:scala-library:2.10.4"
+	compile "org.scala-lang:scala-compiler:2.10.4"
+	compile 'org.slf4j:slf4j-api:1.7.5'
+	testCompile "junit:junit:4.11"
+}
+
+sourceSets {
+	main {
+		scala {
+			srcDirs = ['src/main/scala', 'src/main/java']
+		}
+		java {
+			srcDirs = [ ]
+		}
+	}
+}
+
+
+task run(type: JavaExec, dependsOn: classes) {
+	main = 'com.liferay.osgi.shell.Main'
+	classpath sourceSets.main.runtimeClasspath
+	classpath configurations.runtime
+}
