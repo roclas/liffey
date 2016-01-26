@@ -1,6 +1,5 @@
 package com.liferay.docs.command;
 
-import com.liferay.docs.command.Command;
 import com.liferay.osgi.shell.Interpreter;
 import com.liferay.portal.service.UserLocalService;
 
@@ -41,7 +40,7 @@ public class CommandImpl implements Command {
 	}
 
 	@Override
-	public void command(String[] args) {
-		Interpreter.execute(getUserLocalService(),args);
+	public Object command(String[] args) {
+		return Interpreter.execute(getUserLocalService(),args);
 	}
 }

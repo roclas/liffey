@@ -21,9 +21,13 @@ class LiffeyParser extends RegexParsers {
   def pAnything = """.*""".r ^^ { _.toString }
   def pEnd= """\s*$""".r ^^ { _.toString }
 
-  def pLiffey = (pHelp |pUser | pRole) <~ pEnd
+  def pLiffey = (pHelp |pUser | pRole | pVersion |pDownload | pReplace | pScheduler) <~ pEnd
 
-  def pHelp=  help ^^ { _=>HelpCommand }
+  def pReplace=  "replace".r ~> pThreeArgs ^^ { l=>Replace(l(0).toString,l(1).toString,l(2).toString)}
+  def pDownload=  "download".r ~> anyChars.r ^^ { x=>DownloadCommand(x)}
+  def pVersion=  "liferay version".r ^^ { _=> VersionCommand }
+  def pHelp=  "(help|usage)".r ^^ { _=>HelpCommand }
+  def pScheduler= ((scheduler~>pList)|(pList~>scheduler)) ^^ { _ => SchedulerList}
   def pUser =  ((user~>pCreate)|(pCreate~>user)) ~> pUserOpts ^^ { CreateUser(_) }|
     ((user~>pDelete)|(pDelete~>user)) ~> pUserDeleteOpts ^^ { DeleteUser(_) }|
     ((user~>pShow)|(pShow~>user)) ~> pUserShowOpts ^^ { ShowUser(_) }|
@@ -32,7 +36,8 @@ class LiffeyParser extends RegexParsers {
     ((user~>pCount)|(pCount~>user)) ^^ { _ => CountUsers }
 
   val user: Regex = "users?".r
-  val help: Regex = "(help|usage)".r
+
+  val scheduler: Regex = "scheduler?".r
 
   val emptyStr: String =""
   val anyChars: String ="""\S+"""
@@ -65,6 +70,7 @@ class LiffeyParser extends RegexParsers {
   private val pShow: String = "show"
   private val pList: String = "list"
   val pSearchBy: String = "searchBy-"
+
   def pPassword=(passwordOpt+anyChars).r ^^{x=>{val r=x.toString replaceFirst (passwordOpt,emptyStr);((password,r))}}
   def pId =(idOpt+anyChars).r ^^{x=>{val r=x.toString replaceFirst (idOpt,emptyStr); ((id,r))}}
   def pUserName =(usernameOpt+anyChars).r ^^{x=>{val r=x.toString replaceFirst(usernameOpt,emptyStr);((username,r))}}
@@ -83,9 +89,15 @@ class LiffeyParser extends RegexParsers {
 
   def pUserSearchOpt(m:mutable.Map[String, Any])=(pUserName|pId|pEmail) ^^ {x=>m+=((pSearchBy+x._1,x._2))}
   def pUserEditOpts(m:mutable.Map[String, Any]):Parser[Map[String,Any]]= pUserOpt.+ ^^ { _.toMap ++ m }
-  def pUserUpdateOpts: Parser[Map[String, Any]] = {
+  def pUserUpdateOpts: Parser[Map[String, Any]] = { //TODO: create generic function????
     var cntx=mutable.Map[String,Any]()
     pUserSearchOpt(cntx) ~> pUserEditOpts(cntx)
+  }
+
+  def pListParam(l:mutable.ListBuffer[String])= anyChars.r ^^ {l+=_.toString}
+  def pThreeArgs: Parser[List[Any]] = {
+    var paramsCtx=mutable.ListBuffer[String]()
+    pListParam(paramsCtx) ~> pListParam(paramsCtx) ~> pListParam(paramsCtx) ^^ {_.toList}
   }
 
   def pRole = "role" ~> (pCreate|pDelete|pList|pCount) ~ pAnything ^^ { case c ~ a => role(c,a) }

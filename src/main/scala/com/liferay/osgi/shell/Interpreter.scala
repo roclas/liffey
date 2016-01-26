@@ -15,8 +15,11 @@ object Interpreter extends LiffeyParser with Levenshtein{
 			|	<there will be more implemented soon>
 		""".stripMargin
 
+	//TODO: add schedule jobs usage example??
 	val usageExamples=List(
 		"liffey help",
+		"liffey list scheduler",
+		"liffey scheduler list",
 		"liffey user(s) create -username=<my_desired_username> -password=<my_password> -email=<my_email>",
 		"liffey create user -username=<my_desired_username> -password=<my_password> -email=<my_email>",
 		"liffey user delete -username=<my_desired_username>",
@@ -26,7 +29,9 @@ object Interpreter extends LiffeyParser with Levenshtein{
 		"liffey user count",
 		"liffey user update -email=<email_by_which_to_search> -password=<new_password> -email=<new_email>",
 		"liffey user update -id=<id_to_search> -email=<new_email> #the first option is always used to find the entity",
-		"liffey user update -username=<search_username> -username=<new_name> #searches only by id,email, or username"
+		"liffey user update -username=<search_username> -username=<new_name> #searches only by id,email, or username",
+		"liffey liferay version",
+		"liffey download <http://mysite.com/myjar.jar>"
 	)
 
 	def nocoments(s:String)=s.split("#")(0)
@@ -40,7 +45,6 @@ object Interpreter extends LiffeyParser with Levenshtein{
 	def execute(uservice:UserLocalService,params:Array[String])= {
 		 parse(pLiffey, params.map(_+" ").mkString) match {
 					 case Success(matched,_) => {
-						 println(matched)
 						 implicit val usersservice:UserLocalService=uservice
 						 matched match{
 							 case CreateUser(opts)=> UserHelper.createUser(opts)
@@ -49,8 +53,12 @@ object Interpreter extends LiffeyParser with Levenshtein{
 							 case ShowUser(opts)=> UserHelper.showUser(opts)
 							 case ListUsers=> UserHelper.listUsers
 							 case CountUsers=> UserHelper.countUsers
+							 case VersionCommand=> { OthersHelper.printVersion /*TODO: change what is shown?? */ }
 							 case HelpCommand=> println(usage)
-							 case _=>"UNIMPLEMENTED OPTION (please report the bug)"
+							 case SchedulerList=> OthersHelper.listScheduledTasks
+							 case DownloadCommand(url)=> OthersHelper.downloadJar(url)
+							 case Replace(s,regex,subs)=> OthersHelper.replaceAndPrint(s,regex,subs)
+							 case _=> println( s"$matched UNIMPLEMENTED OPTION (please report the bug)" )
 						 }
 					 }
 					 case Failure(msg,_) =>{
@@ -75,6 +83,14 @@ object Interpreter extends LiffeyParser with Levenshtein{
 object Main extends App {
   println("This jar file is supposed to be deployed as an OSGi bundle")
   println("Please, install it as an OSGi module or it will not work properly")
-  Interpreter.usage
+	def prompt: Any ={
+		while(true){
+			readLine("prompt> ").trim match{
+					case "exit" =>return
+					case x=>println(x)
+			}
+		}
+	}
+	//prompt
 }
 

@@ -1,4 +1,6 @@
 bin/
 npm-debug.log
-liffeyShell.iml
+*.iml
 build
+.gradle/
+.idea/
