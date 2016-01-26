@@ -1,0 +1,17 @@
+basedir = /home/carlos/Liferay/bundles/liferay7/liferay-portal-7.0-ce-a4/tomcat-7.0.62
+aptgetinstall = { 
+	if {"$1" equals ""}{
+	echo "this function takes one parameter"
+	echo "example:"
+	echo "aptgetinstall http://central.maven.org/maven2/org/scala-lang/scala-library/2.10.4/scala-library-2.10.4.jar"
+	}{
+	echo "installing $1 ..."
+	echo "... downloading $1 first ..."
+	liffey download $1
+	localfile = (liffey replace $1 .*/ ($basedir"/.downloads/"))
+	echo "... installing $localfile ..."
+	echo "... process finished!!!"
+
+	}
+}
+

@@ -5,5 +5,5 @@ package com.liferay.docs.command;
  */
 
 public interface Command {
-	        public void command(String[] args);
+	        public Object command(String[] args);
 }

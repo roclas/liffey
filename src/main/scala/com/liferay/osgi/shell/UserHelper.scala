@@ -47,7 +47,8 @@ object UserHelper extends EntityHelper{
 
   def listUsers(implicit usersservice:UserLocalService): Unit ={
     val table: util.List[User] =usersservice.getUsers(QueryUtil.ALL_POS, QueryUtil.ALL_POS)
-    printTable(table.toArray.toSeq)
+    //printTable(table.toArray.toSeq)
+    printFilteredTable(table.toArray.toSeq,List("id","email","username"))
   }
 
   def countUsers(implicit usersservice:UserLocalService): Unit ={

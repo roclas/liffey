@@ -16,9 +16,9 @@ import org.osgi.service.component.annotations.Reference;
 )
 public class Liffey {
 
-    public void liffey(String ... args) {
+    public Object liffey(String ... args) {
         Command command = getCommand();
-        command.command(args);
+        return command.command(args);
     }
 
     public Command getCommand() {
