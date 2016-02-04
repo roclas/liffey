@@ -37,6 +37,7 @@ dependencies {
 	compile "org.scala-lang:scala-library:2.10.4"
 	compile "org.scala-lang:scala-compiler:2.10.4"
 	compile 'org.slf4j:slf4j-api:1.7.5'
+	compile 'org.unix4j:unix4j-command:0.3'
 	testCompile "junit:junit:4.11"
 }
 
@@ -51,9 +52,26 @@ sourceSets {
 	}
 }
 
-
 task run(type: JavaExec, dependsOn: classes) {
 	main = 'com.liferay.osgi.shell.Main'
 	classpath sourceSets.main.runtimeClasspath
 	classpath configurations.runtime
 }
+
+task downloadDeps(type: Copy) {
+	println 'downloading dependencies'
+	from sourceSets.main.runtimeClasspath
+	into 'downloadedDependencies/'
+}
+
+task unzip(type: Copy) {
+	println "unziping dependencies"
+	downloadDeps
+	from zipTree('downloadedDependencies/unix4j-base-0.3.jar') into "build/classes/main" include "org/unix4j/**"
+	from zipTree('downloadedDependencies/unix4j-command-0.3.jar') into "build/classes/main" include "org/unix4j/**"
+}
+
+jar.dependsOn unzip
+
+
+

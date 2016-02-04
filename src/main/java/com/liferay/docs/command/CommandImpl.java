@@ -8,8 +8,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
-
-
 @Component(
 	immediate = true,
 	property = {
@@ -44,3 +42,4 @@ public class CommandImpl implements Command {
 		return Interpreter.execute(getUserLocalService(),args);
 	}
 }
+
