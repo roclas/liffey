@@ -11,6 +11,7 @@ port=8080
 #companyId=$(liffey-get-company | get-fields-from-json companyId)
 baseurl="http://$hostname:$port/api/jsonws"
 
+
 function get-fields-from-json {
 	a=$(echo "$@" | awk '{for(i=0;i++<NF;){printf("%s ","%s")}}'| sed s/.$//) 
 	b=$(echo "$@" | awk '{for(i=0;i++<NF;){printf("obj[\"%s\"],",$i)}}'| sed s/.$//) 
@@ -206,5 +207,29 @@ function liffey-list-local-dl-folders {
 			echo "$2 $name"
 			liffey-list-local-dl-folders $id "$2\t" 2>/dev/null
 		fi
+	done
+}
+
+
+read_dom() { local IFS=\>; read -d \< ENTITY CONTENT }
+function liffey-list-tasks {
+	serverhome="/home/carlos/Documents/training/innsbruck/fundamentals/liferay-portal-6.2-ee-sp11/"
+	for i in $(find $serverhome -name "liferay-portlet.xml" );do
+		found="false"
+		while read_dom; do
+    		if [[ "$ENTITY" = "scheduler-entry" ]]; then
+			echo "\n\n\n\n-------------------------------------------------"
+			echo "$i"
+			echo "-------------------------------------------------"
+			found="true"
+		else
+    			if [[ "$ENTITY" = "/scheduler-entry" ]]; then
+				found="false"
+			fi
+    		fi
+		if [[ $found = "true" ]]; then
+    			echo "$ENTITY => $CONTENT"
+		fi
+		done < $i
 	done
 }
